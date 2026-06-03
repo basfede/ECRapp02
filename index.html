@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0e0f13" />
+  <title>ECRApp</title>
+  <link rel="manifest" id="manifest-placeholder" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#0e0f13; --surface:#16181f; --surface2:#1e2029; --border:#2a2d3a; --accent:#c8f04a; --accent2:#5b7fff; --danger:#ff5555; --warn:#ffb347; --text:#e8eaf0; --muted:#6b7080; --radius:14px; --rsm:8px; }
+    html,body { height:100%; }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; line-height:1.5; overflow-x:hidden; }
+    #root { min-height:100dvh; }
+    .app { max-width:480px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; }
+    /* HEADER */
+    .header { position:sticky; top:0; z-index:50; background:rgba(14,15,19,0.93); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:14px 18px; display:flex; align-items:center; gap:12px; }
+    .hback { background:var(--surface2); border:none; color:var(--text); width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .htitle { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; flex:1; }
+    .hsub { font-size:11px; color:var(--muted); margin-top:1px; }
+    .uchip { display:flex; align-items:center; gap:7px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 10px 5px 5px; cursor:pointer; font-size:13px; font-weight:500; }
+    .av { border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Syne',sans-serif; flex-shrink:0; }
+    /* BOTTOM NAV */
+    .bnav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:rgba(14,15,19,0.97); border-top:1px solid var(--border); display:flex; z-index:60; backdrop-filter:blur(12px); }
+    .bnav-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 8px 14px; cursor:pointer; gap:3px; transition:color .15s; color:var(--muted); border:none; background:transparent; font-family:'DM Sans',sans-serif; }
+    .bnav-tab.on { color:var(--accent); }
+    .bnav-icon { font-size:22px; line-height:1; }
+    .bnav-label { font-size:10px; font-weight:600; font-family:'Syne',sans-serif; letter-spacing:.03em; }
+    /* CONTENT */
+    .content { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:90px; }
+    /* CARD */
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .cp { padding:16px; }
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; padding:10px 16px; cursor:pointer; transition:transform .1s; white-space:nowrap; }
+    .btn:active { transform:scale(0.97); }
+    .btn:disabled { opacity:.4; pointer-events:none; }
+    .bprim { background:var(--accent); color:#0e0f13; }
+    .bsec  { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+    .bdang { background:var(--danger); color:#fff; }
+    .bgh   { background:transparent; color:var(--muted); padding:8px; border-radius:50%; border:none; cursor:pointer; font-size:18px; }
+    .bfw   { width:100%; }
+    /* FAB */
+    .fab { position:fixed; bottom:76px; right:24px; background:var(--accent); color:#0e0f13; border:none; border-radius:50%; width:52px; height:52px; font-size:26px; cursor:pointer; box-shadow:0 4px 20px rgba(200,240,74,.35); display:flex; align-items:center; justify-content:center; z-index:40; }
+    .fab:active { transform:scale(0.93); }
+    /* INPUTS */
+    .input-w { position:relative; }
+    .input-w .ico { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+    input,textarea,select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--rsm); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:10px 12px; outline:none; transition:border-color .15s; -webkit-appearance:none; }
+    input:focus,textarea:focus,select:focus { border-color:var(--accent2); }
+    .iico { padding-left:36px; }
+    textarea { resize:vertical; min-height:70px; }
+    select option { background:var(--surface2); }
+    label { font-size:12px; color:var(--muted); font-weight:500; margin-bottom:5px; display:block; text-transform:uppercase; letter-spacing:.04em; }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    /* TAGS */
+    .tag { display:inline-flex; align-items:center; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600; font-family:'Syne',sans-serif; }
+    .tyes { background:rgba(200,240,74,.15); color:var(--accent); }
+    .tno  { background:rgba(255,85,85,.15); color:var(--danger); }
+    .tpend{ background:rgba(107,112,128,.15); color:var(--muted); }
+    /* CONTACT ITEM */
+    .ci { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; }
+    .ci:last-child { border-bottom:none; }
+    .ci:active { background:var(--surface2); }
+    .cinfo { flex:1; min-width:0; }
+    .cname { font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cmeta { font-size:12px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cbadge { font-size:11px; font-weight:700; font-family:'Syne',sans-serif; background:var(--surface2); color:var(--muted); border:1px solid var(--border); border-radius:10px; padding:2px 8px; }
+    /* INTERACTION ITEM */
+    .ii { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .ii:last-child { border-bottom:none; }
+    .iih { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+    .iit { font-weight:600; font-size:14px; flex:1; }
+    .iid { font-size:11px; color:var(--muted); }
+    .iib { font-size:12px; color:var(--muted); margin-top:4px; }
+    .iir { font-size:13px; color:var(--warn); margin-top:6px; font-style:italic; }
+    .iin { font-size:13px; color:var(--muted); margin-top:5px; }
+    .ii-actions { display:flex; gap:4px; flex-shrink:0; }
+    /* REMINDER ITEM */
+    .ri { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; }
+    .ri:last-child { border-bottom:none; }
+    .ri:active { background:var(--surface2); }
+    .ri-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .ri-check.done { background:var(--accent); border-color:var(--accent); color:#0e0f13; font-size:12px; }
+    .ri-body { flex:1; min-width:0; }
+    .ri-title { font-weight:600; font-size:14px; }
+    .ri-title.done { text-decoration:line-through; color:var(--muted); }
+    .ri-date { font-size:11px; color:var(--accent2); margin-top:3px; }
+    .ri-notes { font-size:12px; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* MODAL */
+    .overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.65); backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; }
+    .modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius) var(--radius) 0 0; width:100%; max-width:480px; max-height:90dvh; overflow-y:auto; padding:20px 18px 40px; animation:sup .2s ease; }
+    .mtitle { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:18px; }
+    @keyframes sup { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+    /* CONFIRM */
+    .conf-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; padding:24px; }
+    .conf-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px 20px; width:100%; max-width:320px; animation:sup .15s ease; }
+    .conf-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:8px; }
+    .conf-msg { font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+    /* RADIO */
+    .rg { display:flex; gap:8px; }
+    .ro { flex:1; padding:10px; border-radius:var(--rsm); border:2px solid var(--border); text-align:center; cursor:pointer; font-size:13px; font-weight:600; font-family:'Syne',sans-serif; transition:all .15s; user-select:none; }
+    .ro.yes.on { border-color:var(--accent); background:rgba(200,240,74,.12); color:var(--accent); }
+    .ro.no.on  { border-color:var(--danger); background:rgba(255,85,85,.12); color:var(--danger); }
+    .ro.pend.on{ border-color:var(--accent2); background:rgba(91,127,255,.12); color:var(--accent2); }
+    /* STATS */
+    .stitle { font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; font-family:'Syne',sans-serif; }
+    .sgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .sbox { background:var(--surface2); border:1px solid var(--border); border-radius:var(--rsm); padding:12px; text-align:center; }
+    .snum { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+    .slbl { font-size:11px; color:var(--muted); margin-top:2px; }
+    /* MISC */
+    .empty { text-align:center; padding:40px 20px; color:var(--muted); }
+    .eico { font-size:36px; margin-bottom:10px; }
+    .etxt { font-size:14px; }
+    .ftabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+    .ftabs::-webkit-scrollbar { display:none; }
+    .ftab { padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--muted); white-space:nowrap; transition:all .15s; font-family:'Syne',sans-serif; }
+    .ftab.on { background:var(--accent); color:#0e0f13; border-color:var(--accent); }
+    .ph { padding:20px 18px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; }
+    .pname { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; }
+    .pown  { font-size:12px; color:var(--muted); margin-top:3px; }
+    .dr { display:flex; align-items:flex-start; gap:10px; font-size:14px; }
+    .dr+.dr { margin-top:8px; }
+    .dic { color:var(--muted); width:16px; flex-shrink:0; margin-top:2px; }
+    .g8  { display:flex; flex-direction:column; gap:8px; }
+    .g14 { display:flex; flex-direction:column; gap:14px; }
+    .row { display:flex; gap:8px; }
+    .div { height:1px; background:var(--border); margin:14px 0; }
+    .toast { position:fixed; top:70px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:10px 20px; font-size:13px; font-weight:500; z-index:300; white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,.4); pointer-events:none; }
+    .urow { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer; }
+    .splash { min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:32px; background:radial-gradient(ellipse at 60% 20%,rgba(200,240,74,.07) 0%,transparent 60%); }
+    .splash-logo { font-family:'Syne',sans-serif; font-size:48px; font-weight:800; color:var(--accent); letter-spacing:-.03em; }
+    .splash-sub { color:var(--muted); font-size:15px; margin-bottom:24px; }
+    .spin { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) opacity(.5); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFmZfmdE25HevoULUz1I1ebGFGUIHA5IY3e0mNMX6QED9sAopCIBH6xdH09mK8Nr_B6Q/exec";
+    const COLORS = [{bg:"#c8f04a",fg:"#0e0f13"},{bg:"#5b7fff",fg:"#fff"},{bg:"#ff5555",fg:"#fff"},{bg:"#ffb347",fg:"#0e0f13"},{bg:"#c77dff",fg:"#fff"},{bg:"#00cfc8",fg:"#0e0f13"}];
+    const ini = n => n ? n.trim().split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase() : "?";
+    const fmt = d => { if(!d) return ""; const dt=new Date(d+"T12:00:00"); return dt.toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"}); };
+
+    async function api(action, data={}) {
+      const p = new URLSearchParams({action});
+      Object.entries(data).forEach(([k,v]) => p.append(k, typeof v==="object"?JSON.stringify(v):v));
+      const r = await fetch(SCRIPT_URL+"?"+p.toString());
+      return r.json();
+    }
+
+    function Confirm({title,msg,onOk,onCancel}) {
+      return (
+        <div className="conf-overlay" onClick={onCancel}>
+          <div className="conf-box" onClick={e=>e.stopPropagation()}>
+            <div className="conf-title">{title}</div>
+            <div className="conf-msg">{msg}</div>
+            <div className="row">
+              <button className="btn bsec bfw" onClick={onCancel}>Cancelar</button>
+              <button className="btn bdang bfw" onClick={onOk}>Eliminar</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [screen, setScreen]       = useState("splash");
+      const [tab, setTab]             = useState("contacts"); // contacts | reminders
+      const [users, setUsers]         = useState([]);
+      const [contacts, setContacts]   = useState([]);
+      const [ints, setInts]           = useState([]);
+      const [reminders, setReminders] = useState([]);
+      const [activeUser, setActiveUser] = useState(null);
+      const [selContact, setSelContact] = useState(null);
+      const [modal, setModal]         = useState(null);
+      const [editInt, setEditInt]     = useState(null);
+      const [editRem, setEditRem]     = useState(null);
+      const [confirm, setConfirm]     = useState(null);
+      const [filter, setFilter]       = useState("all");
+      const [search, setSearch]       = useState("");
+      const [toast, setToast]         = useState("");
+      const [loading, setLoading]     = useState(false);
+
+      const showToast = m => { setToast(m); setTimeout(()=>setToast(""),2400); };
+      const uc = id => { const i=users.findIndex(u=>u.id===id); return COLORS[(i<0?0:i)%COLORS.length]; };
+      const stats = id => { const its=ints.filter(i=>i.contactId===id); return {total:its.length,yes:its.filter(i=>i.result==="si").length,no:its.filter(i=>i.result==="no").length}; };
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [u,c,i,r] = await Promise.all([api("getUsers"),api("getContacts"),api("getInteractions"),api("getReminders")]);
+          setUsers(u.data||[]); setContacts(c.data||[]); setInts(i.data||[]); setReminders(r.data||[]);
+        } catch(e) { showToast("Error al cargar datos"); }
+        setLoading(false);
+      }, []);
+
+      useEffect(() => { if(screen!=="splash") load(); }, [screen]);
+
+      // Búsqueda ampliada: nombre, dirección, teléfono, notas
+      const filtered = contacts.filter(c =>
+        (filter==="all"||c.userId===filter) && (
+          !search ||
+          (c.name||"").toLowerCase().includes(search.toLowerCase()) ||
+          (c.address||"").toLowerCase().includes(search.toLowerCase()) ||
+          (c.phone||"").toLowerCase().includes(search.toLowerCase()) ||
+          (c.notes||"").toLowerCase().includes(search.toLowerCase())
+        )
+      );
+
+      const cInts = selContact
+        ? ints.filter(i=>i.contactId===selContact.id).sort((a,b)=>new Date(b.date)-new Date(a.date))
+        : [];
+
+      const pendRem = reminders.filter(r=>r.done!=="true");
+      const doneRem = reminders.filter(r=>r.done==="true");
+
+      // ── SPLASH ──
+      if(screen==="splash") return (
+        <div className="app">
+          <div className="splash">
+            <div className="splash-logo">ECRApp</div>
+            <div className="splash-sub">Gestión de contactos del equipo</div>
+            <button className="btn bprim" style={{minWidth:220,fontSize:16}} onClick={()=>{load();setModal("userPick");setScreen("list");}}>Elegir usuario →</button>
+          </div>
+          {modal==="userPick"&&<UserPick users={users} loading={loading} activeUser={activeUser}
+            onSelect={u=>{setActiveUser(u);setModal(null);}}
+            onAdd={()=>setModal("addU")}
+            onDelete={u=>setConfirm({title:"Eliminar usuario",msg:`¿Eliminar a ${u.name}?`,onOk:async()=>{await api("deleteUser",{id:u.id});if(activeUser?.id===u.id)setActiveUser(null);setConfirm(null);showToast("Eliminado");load();}})}
+            onClose={()=>setModal(null)} />}
+          {modal==="addU"&&<ModalUser onSave={async n=>{const col=COLORS[users.length%COLORS.length];await api("addUser",{name:n,colorBg:col.bg,colorFg:col.fg});await load();showToast("Usuario creado ✓");setModal("userPick");}} onClose={()=>setModal("userPick")} />}
+          {confirm&&<Confirm {...confirm} onCancel={()=>setConfirm(null)} />}
+          {toast&&<div className="toast">{toast}</div>}
+        </div>
+      );
+
+      // ── DETAIL ──
+      if(screen==="detail"&&selContact) {
+        const col=uc(selContact.userId), owner=users.find(u=>u.id===selContact.userId), st=stats(selContact.id);
+        return (
+          <div className="app">
+            <div className="header">
+              <button className="hback" onClick={()=>setScreen("list")}>←</button>
+              <div style={{flex:1}}><div className="htitle">Perfil de contacto</div></div>
+              <button className="bgh" onClick={()=>setModal("editC")}>✏️</button>
+              <button className="bgh" style={{color:"var(--danger)"}} onClick={()=>setConfirm({title:"Eliminar contacto",msg:`¿Eliminar a ${selContact.name}?`,onOk:async()=>{await api("deleteContact",{id:selContact.id});setConfirm(null);showToast("Eliminado");setScreen("list");load();}})}>🗑️</button>
+            </div>
+            <div className="content">
+              {/* Info */}
+              <div className="card">
+                <div className="ph">
+                  <div className="av" style={{width:54,height:54,fontSize:22,background:col.bg,color:col.fg}}>{ini(selContact.name)}</div>
+                  <div><div className="pname">{selContact.name}</div><div className="pown">{owner?`📌 ${owner.name}`:"Sin asignar"}</div></div>
+                </div>
+                <div className="cp g8">
+                  {selContact.address&&<div className="dr"><span className="dic">📍</span><span>{selContact.address}</span></div>}
+                  {selContact.phone&&<div className="dr"><span className="dic">📞</span><span>{selContact.phone}</span></div>}
+                  {selContact.notes&&<div className="dr"><span className="dic">📝</span><span style={{color:"var(--muted)"}}>{selContact.notes}</span></div>}
+                </div>
+              </div>
+              {/* Stats */}
+              <div>
+                <div className="stitle">Resumen</div>
+                <div className="sgrid">
+                  <div className="sbox"><div className="snum">{st.total}</div><div className="slbl">Total</div></div>
+                  <div className="sbox"><div className="snum" style={{color:"var(--accent)"}}>{st.yes}</div><div className="slbl">Aceptaron</div></div>
+                  <div className="sbox"><div className="snum" style={{color:"var(--danger)"}}>{st.no}</div><div className="slbl">Rechazaron</div></div>
+                </div>
+              </div>
+              {/* Interactions */}
+              <div>
+                <div className="stitle">Historial</div>
+                <div className="card">
+                  {loading?<div className="empty"><div className="spin"></div></div>
+                  :cInts.length===0?<div className="empty"><div className="eico">💬</div><div className="etxt">Sin interacciones aún</div></div>
+                  :cInts.map(it=>{
+                    const by=users.find(u=>u.id===it.userId);
+                    return (
+                      <div className="ii" key={it.id}>
+                        <div className="iih">
+                          <div className="iit">{it.type}</div>
+                          {it.result==="si"&&<span className="tag tyes">✓ Sí</span>}
+                          {it.result==="no"&&<span className="tag tno">✕ No</span>}
+                          {it.result==="pendiente"&&<span className="tag tpend">⏳</span>}
+                          <div className="ii-actions">
+                            <button className="bgh" style={{fontSize:14,padding:4}} onClick={()=>{setEditInt(it);setModal("editInt");}}>✏️</button>
+                            <button className="bgh" style={{fontSize:14,padding:4,color:"var(--danger)"}} onClick={()=>setConfirm({title:"Eliminar interacción",msg:"¿Eliminar esta interacción?",onOk:async()=>{await api("deleteInteraction",{id:it.id});setConfirm(null);showToast("Eliminada");load();}})}>🗑️</button>
+                          </div>
+                        </div>
+                        <div className="iid">{fmt(it.date)}</div>
+                        {it.reason&&<div className="iir">"{it.reason}"</div>}
+                        {it.notes&&<div className="iin">{it.notes}</div>}
+                        {by&&<div className="iib">→ por {by.name}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <button className="fab" onClick={()=>setModal("addInt")}>+</button>
+            {modal==="addInt"&&<ModalInteraction onSave={async d=>{await api("addInteraction",{...d,contactId:selContact.id,userId:activeUser.id,date:new Date().toISOString().split("T")[0]});await load();showToast("Interacción agregada ✓");setModal(null);}} onClose={()=>setModal(null)} />}
+            {modal==="editInt"&&editInt&&<ModalInteraction edit={editInt} onSave={async d=>{await api("updateInteraction",{...d,id:editInt.id});await load();showToast("Interacción actualizada ✓");setModal(null);setEditInt(null);}} onClose={()=>{setModal(null);setEditInt(null);}} />}
+            {modal==="editC"&&<ModalContact edit={selContact} users={users} onSave={async d=>{await api("updateContact",{...d,id:selContact.id});setSelContact(s=>({...s,...d}));await load();showToast("Guardado ✓");setModal(null);}} onClose={()=>setModal(null)} />}
+            {confirm&&<Confirm {...confirm} onCancel={()=>setConfirm(null)} />}
+            {toast&&<div className="toast">{toast}</div>}
+          </div>
+        );
+      }
+
+      // ── MAIN (contacts + reminders) ──
+      return (
+        <div className="app">
+          <div className="header">
+            <div style={{flex:1}}>
+              <div className="htitle">ECRApp</div>
+              <div className="hsub">{tab==="contacts"?`${contacts.length} contactos · ${users.length} usuarios`:`${pendRem.length} pendientes · ${doneRem.length} completados`}</div>
+            </div>
+            <div className="uchip" onClick={()=>setModal("userPick")}>
+              {activeUser&&(()=>{const c=uc(activeUser.id);return<div className="av" style={{width:26,height:26,fontSize:12,background:c.bg,color:c.fg}}>{ini(activeUser.name)}</div>;})()}
+              <span style={{maxWidth:80,overflow:"hidden",textOverflow:"ellipsis"}}>{activeUser?.name||"Elegir"}</span>
+              <span style={{color:"var(--muted)",fontSize:11}}>▼</span>
+            </div>
+          </div>
+
+          {/* CONTACTS TAB */}
+          {tab==="contacts"&&(
+            <div className="content">
+              <div className="input-w">
+                <span className="ico">🔍</span>
+                <input className="iico" placeholder="Buscar por nombre, dirección, notas..." value={search} onChange={e=>setSearch(e.target.value)} />
+              </div>
+              <div className="ftabs">
+                <div className={`ftab ${filter==="all"?"on":""}`} onClick={()=>setFilter("all")}>Todos</div>
+                {users.map((u,i)=>{const c=COLORS[i%COLORS.length];return<div key={u.id} className={`ftab ${filter===u.id?"on":""}`} style={filter===u.id?{background:c.bg,color:c.fg,borderColor:c.bg}:{}} onClick={()=>setFilter(u.id)}>{u.name}</div>;})}
+              </div>
+              <div className="card">
+                {loading?<div className="empty"><div className="spin"></div><div className="etxt">Cargando...</div></div>
+                :filtered.length===0?<div className="empty"><div className="eico">👥</div><div className="etxt">Sin resultados</div></div>
+                :filtered.map(c=>{const col=uc(c.userId),st=stats(c.id),own=users.find(u=>u.id===c.userId);return(
+                  <div className="ci" key={c.id} onClick={()=>{setSelContact(c);setScreen("detail");}}>
+                    <div className="av" style={{width:42,height:42,fontSize:16,background:col.bg,color:col.fg}}>{ini(c.name)}</div>
+                    <div className="cinfo"><div className="cname">{c.name}</div><div className="cmeta">{c.address||"Sin dirección"}{own?` · ${own.name}`:""}</div></div>
+                    <div className="cbadge">{st.total} int.</div>
+                    <span style={{color:"var(--muted)",fontSize:18}}>›</span>
+                  </div>
+                );})}
+              </div>
+            </div>
+          )}
+
+          {/* REMINDERS TAB */}
+          {tab==="reminders"&&(
+            <div className="content">
+              {pendRem.length>0&&<>
+                <div className="stitle">Pendientes</div>
+                <div className="card">
+                  {pendRem.sort((a,b)=>(a.date||"9")>(b.date||"9")?1:-1).map(r=>(
+                    <div className="ri" key={r.id}>
+                      <div className={`ri-check ${r.done==="true"?"done":""}`} onClick={async()=>{await api("updateReminder",{id:r.id,done:"true"});load();}}></div>
+                      <div className="ri-body" onClick={()=>{setEditRem(r);setModal("editRem");}}>
+                        <div className={`ri-title ${r.done==="true"?"done":""}`}>{r.title}</div>
+                        {r.date&&<div className="ri-date">📅 {fmt(r.date)}</div>}
+                        {r.notes&&<div className="ri-notes">{r.notes}</div>}
+                      </div>
+                      <button className="bgh" style={{fontSize:14,color:"var(--danger)",padding:4}} onClick={()=>setConfirm({title:"Eliminar recordatorio",msg:`¿Eliminar "${r.title}"?`,onOk:async()=>{await api("deleteReminder",{id:r.id});setConfirm(null);showToast("Eliminado");load();}})}>🗑️</button>
+                    </div>
+                  ))}
+                </div>
+              </>}
+              {doneRem.length>0&&<>
+                <div className="stitle">Completados</div>
+                <div className="card">
+                  {doneRem.map(r=>(
+                    <div className="ri" key={r.id} style={{opacity:.6}}>
+                      <div className="ri-check done" onClick={async()=>{await api("updateReminder",{id:r.id,done:"false"});load();}}>✓</div>
+                      <div className="ri-body">
+                        <div className="ri-title done">{r.title}</div>
+                        {r.notes&&<div className="ri-notes">{r.notes}</div>}
+                      </div>
+                      <button className="bgh" style={{fontSize:14,color:"var(--danger)",padding:4}} onClick={()=>setConfirm({title:"Eliminar recordatorio",msg:`¿Eliminar "${r.title}"?`,onOk:async()=>{await api("deleteReminder",{id:r.id});setConfirm(null);showToast("Eliminado");load();}})}>🗑️</button>
+                    </div>
+                  ))}
+                </div>
+              </>}
+              {reminders.length===0&&!loading&&<div className="empty"><div className="eico">🔔</div><div className="etxt">Sin recordatorios todavía</div></div>}
+              {loading&&<div className="empty"><div className="spin"></div></div>}
+            </div>
+          )}
+
+          <button className="fab" onClick={()=>setModal(tab==="contacts"?"addC":"addRem")}>+</button>
+
+          {/* BOTTOM NAV */}
+          <div className="bnav">
+            <button className={`bnav-tab ${tab==="contacts"?"on":""}`} onClick={()=>setTab("contacts")}>
+              <span className="bnav-icon">👥</span>
+              <span className="bnav-label">Contactos</span>
+            </button>
+            <button className={`bnav-tab ${tab==="reminders"?"on":""}`} onClick={()=>setTab("reminders")}>
+              <span className="bnav-icon">🔔</span>
+              <span className="bnav-label">Recordatorios</span>
+            </button>
+          </div>
+
+          {modal==="userPick"&&<UserPick users={users} loading={loading} activeUser={activeUser} onSelect={u=>{setActiveUser(u);setModal(null);}} onAdd={()=>setModal("addU")} onDelete={u=>setConfirm({title:"Eliminar usuario",msg:`¿Eliminar a ${u.name}?`,onOk:async()=>{await api("deleteUser",{id:u.id});if(activeUser?.id===u.id)setActiveUser(null);setConfirm(null);showToast("Eliminado");load();}})} onClose={()=>setModal(null)} />}
+          {modal==="addU"&&<ModalUser onSave={async n=>{const col=COLORS[users.length%COLORS.length];await api("addUser",{name:n,colorBg:col.bg,colorFg:col.fg});await load();showToast("Usuario creado ✓");setModal("userPick");}} onClose={()=>setModal("userPick")} />}
+          {modal==="addC"&&<ModalContact users={users} activeUser={activeUser} onSave={async d=>{await api("addContact",d);await load();showToast("Contacto agregado ✓");setModal(null);}} onClose={()=>setModal(null)} />}
+          {modal==="addRem"&&<ModalReminder onSave={async d=>{await api("addReminder",{...d,userId:activeUser?.id||"",done:"false"});await load();showToast("Recordatorio agregado ✓");setModal(null);}} onClose={()=>setModal(null)} />}
+          {modal==="editRem"&&editRem&&<ModalReminder edit={editRem} onSave={async d=>{await api("updateReminder",{...d,id:editRem.id});await load();showToast("Actualizado ✓");setModal(null);setEditRem(null);}} onClose={()=>{setModal(null);setEditRem(null);}} />}
+          {confirm&&<Confirm {...confirm} onCancel={()=>setConfirm(null)} />}
+          {toast&&<div className="toast">{toast}</div>}
+        </div>
+      );
+    }
+
+    function UserPick({users,loading,activeUser,onSelect,onAdd,onDelete,onClose}) {
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mtitle">Elegir usuario</div>
+            {loading&&<div style={{textAlign:"center",padding:"12px 0"}}><div className="spin"></div></div>}
+            <div className="g8">
+              {users.map((u,i)=>{const c=COLORS[i%COLORS.length],on=activeUser?.id===u.id;return(
+                <div key={u.id} className="urow" style={{border:on?"2px solid var(--accent)":"1px solid var(--border)",background:on?"rgba(200,240,74,.08)":"var(--surface2)",borderRadius:10}} onClick={()=>onSelect(u)}>
+                  <div className="av" style={{width:38,height:38,fontSize:15,background:c.bg,color:c.fg}}>{ini(u.name)}</div>
+                  <div style={{flex:1,fontWeight:600}}>{u.name}</div>
+                  {on&&<span style={{color:"var(--accent)"}}>✓</span>}
+                  <button className="bgh" style={{color:"var(--danger)",fontSize:16}} onClick={e=>{e.stopPropagation();onDelete(u);}}>🗑️</button>
+                </div>
+              );})}
+            </div>
+            <div className="div"/>
+            <button className="btn bsec bfw" onClick={onAdd}>+ Crear nuevo usuario</button>
+          </div>
+        </div>
+      );
+    }
+
+    function ModalUser({onSave,onClose}) {
+      const [n,setN]=useState("");
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mtitle">Nuevo usuario</div>
+            <div className="g14">
+              <div className="field"><label>Nombre</label><input placeholder="Ej: Valentina" value={n} onChange={e=>setN(e.target.value)} /></div>
+              <div className="row"><button className="btn bsec bfw" onClick={onClose}>Cancelar</button><button className="btn bprim bfw" disabled={!n.trim()} onClick={()=>onSave(n.trim())}>Crear</button></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ModalContact({onSave,onClose,users,activeUser,edit}) {
+      const [f,setF]=useState(edit||{name:"",address:"",phone:"",notes:"",userId:activeUser?.id||""});
+      const s=(k,v)=>setF(x=>({...x,[k]:v}));
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mtitle">{edit?"Editar contacto":"Nuevo contacto"}</div>
+            <div className="g14">
+              <div className="field"><label>Nombre *</label><input placeholder="Nombre completo" value={f.name} onChange={e=>s("name",e.target.value)} /></div>
+              <div className="field"><label>Dirección</label><input placeholder="Calle, número, barrio..." value={f.address} onChange={e=>s("address",e.target.value)} /></div>
+              <div className="field"><label>Teléfono</label><input placeholder="011 ..." value={f.phone} onChange={e=>s("phone",e.target.value)} /></div>
+              <div className="field"><label>Notas / perfil</label><textarea placeholder="Observaciones sobre la persona..." value={f.notes} onChange={e=>s("notes",e.target.value)} /></div>
+              <div className="field"><label>Asignado a</label>
+                <select value={f.userId} onChange={e=>s("userId",e.target.value)}>
+                  <option value="">-- Sin asignar --</option>
+                  {(users||[]).map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
+              </div>
+              <div className="row"><button className="btn bsec bfw" onClick={onClose}>Cancelar</button><button className="btn bprim bfw" disabled={!f.name.trim()} onClick={()=>onSave(f)}>{edit?"Guardar":"Agregar"}</button></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ModalInteraction({onSave,onClose,edit}) {
+      const TIPOS=["Visita personal","Llamada","Invitación a reunión","Invitación a evento","Seguimiento","Otro"];
+      const [f,setF]=useState(edit?{type:TIPOS.includes(edit.type)?edit.type:"Otro",ctype:TIPOS.includes(edit.type)?"":edit.type,result:edit.result||"pendiente",reason:edit.reason||"",notes:edit.notes||""}:{type:"",ctype:"",result:"pendiente",reason:"",notes:""});
+      const s=(k,v)=>setF(x=>({...x,[k]:v}));
+      const tv=f.type==="Otro"?f.ctype:f.type;
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mtitle">{edit?"Editar interacción":"Nueva interacción"}</div>
+            <div className="g14">
+              <div className="field"><label>Tipo</label>
+                <select value={f.type} onChange={e=>s("type",e.target.value)}>
+                  <option value="">-- Elegir tipo --</option>
+                  {TIPOS.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              {f.type==="Otro"&&<div className="field"><label>Especificar</label><input placeholder="Describí el tipo..." value={f.ctype} onChange={e=>s("ctype",e.target.value)} /></div>}
+              <div className="field"><label>Resultado</label>
+                <div className="rg">
+                  {[["si","✓ Aceptó","yes"],["no","✕ Rechazó","no"],["pendiente","⏳ Pendiente","pend"]].map(([v,l,cl])=>(
+                    <div key={v} className={`ro ${cl} ${f.result===v?"on":""}`} onClick={()=>s("result",v)}>{l}</div>
+                  ))}
+                </div>
+              </div>
+              {f.result==="no"&&<div className="field"><label>¿Por qué rechazó?</label><input placeholder="Motivo..." value={f.reason} onChange={e=>s("reason",e.target.value)} /></div>}
+              <div className="field"><label>Notas</label><textarea placeholder="Observaciones..." value={f.notes} onChange={e=>s("notes",e.target.value)} /></div>
+              <div className="row"><button className="btn bsec bfw" onClick={onClose}>Cancelar</button><button className="btn bprim bfw" disabled={!tv.trim()} onClick={()=>onSave({type:tv,result:f.result,reason:f.reason,notes:f.notes})}>{edit?"Guardar":"Agregar"}</button></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ModalReminder({onSave,onClose,edit}) {
+      const [f,setF]=useState(edit||{title:"",notes:"",date:""});
+      const s=(k,v)=>setF(x=>({...x,[k]:v}));
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mtitle">{edit?"Editar recordatorio":"Nuevo recordatorio"}</div>
+            <div className="g14">
+              <div className="field"><label>Título *</label><input placeholder="Ej: Llamar a Carlos el martes" value={f.title} onChange={e=>s("title",e.target.value)} /></div>
+              <div className="field"><label>Fecha (opcional)</label><input type="date" value={f.date} onChange={e=>s("date",e.target.value)} /></div>
+              <div className="field"><label>Notas</label><textarea placeholder="Detalles adicionales..." value={f.notes} onChange={e=>s("notes",e.target.value)} /></div>
+              <div className="row"><button className="btn bsec bfw" onClick={onClose}>Cancelar</button><button className="btn bprim bfw" disabled={!f.title.trim()} onClick={()=>onSave(f)}>{edit?"Guardar":"Agregar"}</button></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+  <script>
+    // Inline manifest — no external file needed
+    const manifest = {
+      name: "ECRApp",
+      short_name: "ECRApp",
+      description: "Gestión de contactos del equipo",
+      start_url: "/ECRapp02/",
+      display: "standalone",
+      background_color: "#0e0f13",
+      theme_color: "#0e0f13",
+      orientation: "portrait",
+      icons: [
+        { src: "https://placehold.co/192x192/0e0f13/c8f04a?text=E", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+        { src: "https://placehold.co/512x512/0e0f13/c8f04a?text=E", sizes: "512x512", type: "image/png", purpose: "any maskable" }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    document.getElementById('manifest-placeholder').href = URL.createObjectURL(blob);
+
+    // Inline service worker
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE='ecrapp-v1';
+        self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));});
+        self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});
+      `;
+      const swBlob = new Blob([swCode], {type:'text/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+    }
+  </script>
+</body>
+</html>
