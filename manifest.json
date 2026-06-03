@@ -1,0 +1,25 @@
+{
+  "name": "ECRApp",
+  "short_name": "ECRApp",
+  "description": "Gestión de contactos del equipo",
+  "start_url": "/ECRapp02/",
+  "scope": "/ECRapp02/",
+  "display": "standalone",
+  "background_color": "#0e0f13",
+  "theme_color": "#0e0f13",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
